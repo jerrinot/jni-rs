@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - `JValueGen` has been removed. `JValue` and `JValueOwned` are now separate, unrelated, non-generic types. ([#429](https://github.com/jni-rs/jni-rs/pull/429))
 - `get_object_class` borrows the `JNIEnv` mutably because it creates a new local reference. ([#456](https://github.com/jni-rs/jni-rs/pull/456))
+- `get/set_field_unchecked` have been marked as unsafe since they can lead to undefined behaviour if the given types don't match the field type ([#457](https://github.com/jni-rs/jni-rs/pull/457))
 
 ## [0.21.1] — 2023-03-08
 
