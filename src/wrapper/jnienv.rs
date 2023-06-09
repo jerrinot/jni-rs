@@ -1124,7 +1124,7 @@ impl<'local> JNIEnv<'local> {
     }
 
     /// Get the class for an object.
-    pub fn get_object_class<'other_local, O>(&self, obj: O) -> Result<JClass<'local>>
+    pub fn get_object_class<'other_local, O>(&mut self, obj: O) -> Result<JClass<'local>>
     where
         O: AsRef<JObject<'other_local>>,
     {
@@ -1326,7 +1326,8 @@ impl<'local> JNIEnv<'local> {
             return Err(Error::InvalidArgList(parsed));
         }
 
-        let class = self.auto_local(self.get_object_class(obj)?);
+        let class = self.get_object_class(obj)?;
+        let class = self.auto_local(class);
 
         let args: Vec<jvalue> = args.iter().map(|v| v.as_jni()).collect();
 
@@ -1566,7 +1567,8 @@ impl<'local> JNIEnv<'local> {
         obj: &'obj_ref JString<'other_local>,
     ) -> Result<JavaStr<'local, 'other_local, 'obj_ref>> {
         let string_class = self.find_class("java/lang/String")?;
-        if !self.is_assignable_from(string_class, self.get_object_class(obj)?)? {
+        let obj_class = self.get_object_class(obj)?;
+        if !self.is_assignable_from(string_class, obj_class)? {
             return Err(JniCall(JniError::InvalidArguments));
         }
 
@@ -2235,7 +2237,8 @@ impl<'local> JNIEnv<'local> {
         T: Into<JNIString> + AsRef<str>,
     {
         let obj = obj.as_ref();
-        let class = self.auto_local(self.get_object_class(obj)?);
+        let class = self.get_object_class(obj)?;
+        let class = self.auto_local(class);
 
         let parsed = ReturnType::from_str(ty.as_ref())?;
 
@@ -2273,7 +2276,8 @@ impl<'local> JNIEnv<'local> {
                 "cannot set field with method type",
             )),
             _ => {
-                let class = self.auto_local(self.get_object_class(obj)?);
+                let class = self.get_object_class(obj)?;
+                let class = self.auto_local(class);
 
                 self.set_field_unchecked(obj, (&class, name, ty), val)
             }
@@ -2456,7 +2460,8 @@ impl<'local> JNIEnv<'local> {
         T: Send + 'static,
     {
         let obj = obj.as_ref();
-        let class = self.auto_local(self.get_object_class(obj)?);
+        let class = self.get_object_class(obj)?;
+        let class = self.auto_local(class);
         let field_id: JFieldID = Desc::<JFieldID>::lookup((&class, &field, "J"), self)?;
 
         let guard = self.lock_obj(obj)?;
@@ -2527,7 +2532,8 @@ impl<'local> JNIEnv<'local> {
         T: Send + 'static,
     {
         let obj = obj.as_ref();
-        let class = self.auto_local(self.get_object_class(obj)?);
+        let class = self.get_object_class(obj)?;
+        let class = self.auto_local(class);
         let field_id: JFieldID = Desc::<JFieldID>::lookup((&class, &field, "J"), self)?;
 
         let mbox = {

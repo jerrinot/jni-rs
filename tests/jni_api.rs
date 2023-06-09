@@ -752,7 +752,7 @@ pub fn get_array_elements_critical() {
 
 #[test]
 pub fn get_object_class() {
-    let env = attach_current_thread();
+    let mut env = attach_current_thread();
     let string = env.new_string("test").unwrap();
     let result = env.get_object_class(string);
     assert!(result.is_ok());
@@ -761,7 +761,7 @@ pub fn get_object_class() {
 
 #[test]
 pub fn get_object_class_null_arg() {
-    let env = attach_current_thread();
+    let mut env = attach_current_thread();
     let null_obj = JObject::null();
     let result = env
         .get_object_class(null_obj)
